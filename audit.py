@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 s3  = boto3.resource('s3')
 iam = boto3.resource('iam')
 now = datetime.now(timezone.utc)
+max_allowed_age = -1 # TODO Implement proper cli ux and turn this into a cli paramter/switch
 
 def isPublic(grants):
    grants = [ grantee['Grantee'] for grantee in grants ] # Cleanup the acl a bit, prevent nested key refrences in loop below
@@ -18,11 +19,13 @@ def isPublic(grants):
 
 for bucket in s3.buckets.all():
    for obj in bucket.objects.all():
-      print(f's3://{bucket.name}/{obj.key} | {isPublic(obj.Acl().grants)}')
+      if isPublic(obj.Acl().grants):
+         print(f's3://{bucket.name}/{obj.key}')
 
 print('------------------------------------------------------------------')
 
 for user in iam.users.all():
    for accessKey in user.access_keys.all():
       age = now - accessKey.create_date
-      print(f'{accessKey.user_name}@{accessKey.access_key_id} : {age.days}')
+      if age.days > max_allowed_age:
+          print(f'{accessKey.user_name}@{accessKey.access_key_id} : {age.days}')
