@@ -13,4 +13,5 @@ git clone git@github.com:andreyzax/aws_audit.git
 cd aws_audit
 python -mvenv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
 ```
