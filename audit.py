@@ -6,9 +6,12 @@ from datetime import datetime, timezone
 
 argparser = argparse.ArgumentParser(description='Audit aws account for security policy vaiolations')
 argparser.add_argument('-d', '--days', required=False, metavar='Days', type=int, help='Report aws keypairs older then this number of days (90 days is default value)')
+argparser.add_argument('-s', '--s3', required=False, action='store_true', help='Report s3 public objects')
+argparser.add_argument('-k', '--access-keys', required=False, action='store_true', help='Report old access keys')
 args = argparser.parse_args()
 
 max_allowed_age = args.days if isinstance(args.days, int) else 90
+default_action = True if (not args.s3) and (not args.access_keys) else False
 
 s3  = boto3.resource('s3')
 iam = boto3.resource('iam')
@@ -38,5 +41,8 @@ def auditAccessKeys():
          if age.days > max_allowed_age:
              print(f'{accessKey.user_name}@{accessKey.access_key_id} : {age.days}')
 
-auditS3Objects()
-auditAccessKeys()
+
+if default_action or args.s3:
+   auditS3Objects()
+if default_action or args.access_keys:
+   auditAccessKeys()
