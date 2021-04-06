@@ -12,9 +12,10 @@ using any of the usual methods (config files, env variables or possibly an iam r
 ```sh
 git clone git@github.com:andreyzax/aws_audit.git
 cd aws_audit
-python -mvenv .venv
+python3 -mvenv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+chmod u+x ./audit.py
 ```
 ### Usage
 ```code
