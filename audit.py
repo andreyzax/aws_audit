@@ -5,14 +5,15 @@ import boto3
 from datetime import datetime, timezone
 
 argparser = argparse.ArgumentParser(description='Audit aws account for security policy vaiolations')
-argparser.add_argument('-d', '--days', required=True, metavar='Days', type=int, help='Report aws keypairs older then this number of days')
+argparser.add_argument('-d', '--days', required=False, metavar='Days', type=int, help='Report aws keypairs older then this number of days (90 days is default value)')
 args = argparser.parse_args()
 
+max_allowed_age = args.days if isinstance(args.days, int) else 90
 
 s3  = boto3.resource('s3')
 iam = boto3.resource('iam')
 now = datetime.now(timezone.utc)
-max_allowed_age = args.days
+
 
 def isPublic(grants):
    grants = [ grantee['Grantee'] for grantee in grants ] # Cleanup the acl a bit, prevent nested key refrences in loop below
