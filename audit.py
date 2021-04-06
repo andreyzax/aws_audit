@@ -22,15 +22,20 @@ def isPublic(grants):
 
    return False
 
-for bucket in s3.buckets.all():
-   for obj in bucket.objects.all():
-      if isPublic(obj.Acl().grants):
-         print(f's3://{bucket.name}/{obj.key}')
+def auditS3Objects():
+   print('-'*14 + 'Publicly accessible objects' + '-'*14)
+   for bucket in s3.buckets.all():
+      for obj in bucket.objects.all():
+         if isPublic(obj.Acl().grants):
+            print(f's3://{bucket.name}/{obj.key}')
 
-print('------------------------------------------------------------------')
+def auditAccessKeys():
+   print('-'*14 + 'Old Access Keys' + '-'*14)
+   for user in iam.users.all():
+      for accessKey in user.access_keys.all():
+         age = now - accessKey.create_date
+         if age.days > max_allowed_age:
+             print(f'{accessKey.user_name}@{accessKey.access_key_id} : {age.days}')
 
-for user in iam.users.all():
-   for accessKey in user.access_keys.all():
-      age = now - accessKey.create_date
-      if age.days > max_allowed_age:
-          print(f'{accessKey.user_name}@{accessKey.access_key_id} : {age.days}')
+auditS3Objects()
+auditAccessKeys()
